@@ -1,0 +1,21 @@
+name: flutter_logicalline
+description: "A new Flutter project."
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+    sdk: ">=3.3.4 <4.0.0"
+
+dependencies:
+    flame: ^1.17.0
+    flutter:
+        sdk: flutter
+
+dev_dependencies:
+    flame_lint: ^1.1.2
+    flutter_test:
+        sdk: flutter
+
+flutter:
+    uses-material-design: true
