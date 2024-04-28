@@ -1,11 +1,7 @@
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
-
-enum PieceColor {
-  black,
-  white,
-}
+import 'package:flutter_logicalline/game/components/game_state_component.dart';
 
 /// 円柱を斜めから見たような形状のコンポーネント
 class PieceComponent extends CustomPainterComponent with DragCallbacks {

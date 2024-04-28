@@ -1,103 +1,35 @@
+import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_logicalline/game/components/board_component.dart';
-import 'package:flutter_logicalline/game/components/piece_component.dart';
+import 'package:flutter_logicalline/game/components/cell_component.dart';
+import 'package:flutter_logicalline/game/components/game_state_component.dart';
 
 class LogicalLineGame extends FlameGame {
   @override
   Color backgroundColor() => Colors.white;
 
-  late final BoardComponent board;
+  LogicalLineGame()
+      : super(
+          camera: CameraComponent.withFixedResolution(width: 520, height: 600),
+        );
+
+  late final GameStateComponent state;
 
   @override
   Future<void> onLoad() async {
     super.onLoad();
-    final whitePieces = [
-      ...List.generate(
-        5,
-        (index) => PieceComponent(
-          pieceColor: PieceColor.white,
-          pieceNumber: index * 2 + 1,
-        ),
-      ),
-      PieceComponent(
-        pieceColor: PieceColor.white,
-        pieceNumber: 5,
-      ),
-    ];
-    final blackPieces = List.generate(
-      6,
-      (index) => PieceComponent(
-        pieceColor: PieceColor.black,
-        pieceNumber: index * 2,
-      ),
-    );
-
-    whitePieces.shuffle();
-    blackPieces.shuffle();
-
-    board = BoardComponent(
-      initCells: [
-        CellComponent(
-          pieces: whitePieces,
-        ),
-        CellComponent(
-          pieces: blackPieces,
-        ),
-      ],
-      cells: List.generate(
-        9,
-        (index) => CellComponent(
-          pieces: [],
-        ),
-      ),
-    );
-    await add(board);
+    state = GameStateComponent();
+    camera.viewfinder.anchor = Anchor.topLeft;
+    world.add(state);
   }
 
   @override
   void update(double dt) {
     super.update(dt);
     // 勝敗判定
-    // board.cells
-    final winner = whichColorWon(board.cells);
-    print(winner);
-  }
+    final winner = whichColorWon(state.board.cells);
 
-  /// セルの所有者を返す
-  ///
-  /// if ピースが一つもない場合
-  /// nullを返す
-  ///
-  /// if 一つのセルに白と黒のpieceがあった場合
-  /// 1. 高さの比較　lengthの出力が大きい方が所有権を持つ
-  /// 2. 数字の比較　もし高さが同じ場合数字が大きい方が所有権を持つ
-  ///
-  /// if 一つのセルにどちらか一方のpieceがあったばあい
-  /// 1. 暫定でそのpieceが所有権を持つ
-  PieceColor? getCellOwnership(CellComponent cell) {
-    // 白と黒のピースをそれぞれリストに振り分ける
-    final whitePieceList =
-        cell.pieces.where((e) => e.pieceColor == PieceColor.white).toList();
-    final blackPieceList =
-        cell.pieces.where((e) => e.pieceColor == PieceColor.black).toList();
-
-    final whiteHeight = whitePieceList.length;
-    final blackHeight = blackPieceList.length;
-
-    // どちらもない場合は所有者なし
-    if (whiteHeight == 0 && blackHeight == 0) {
-      return null;
-    }
-    // 高さの比較　lengthの出力が大きい方が所有権を持つ
-    if (whiteHeight != blackHeight) {
-      return whiteHeight > blackHeight ? PieceColor.white : PieceColor.black;
-    }
-    // 数字の比較　もし高さが同じ場合数字が大きい方が所有権を持つ
-    final whiteNumber = whitePieceList.last.pieceNumber;
-    final blackNumber = blackPieceList.last.pieceNumber;
-
-    return whiteNumber > blackNumber ? PieceColor.white : PieceColor.black;
+    state.result.setWinner(winner);
   }
 
   PieceColor? whichColorWon(List<CellComponent> cellList) {
@@ -118,7 +50,7 @@ class LogicalLineGame extends FlameGame {
     2,4,6 2ずつ増える
     */
 
-    final ownershipList = cellList.map(getCellOwnership).toList();
+    final ownershipList = cellList.map((e) => e.getCellOwnership()).toList();
 
     for (var i = 0; i < 3; i++) {
       // 横の確認
