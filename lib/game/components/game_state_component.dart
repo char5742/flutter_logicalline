@@ -25,17 +25,14 @@ typedef Piece = ({
 });
 
 class GameStateComponent extends Component {
-  /// 盤面のセルのリスト
-  late final List<Cell> cells;
-
-  /// 初期配置のセル
-  late final Cell initCell;
-
   late final BoardComponent board;
 
   late final ResultComponent result;
 
-  GameStateComponent() {
+  @override
+  FutureOr<void> onLoad() {
+    super.onLoad();
+
     final whitePieces = [
       ...List.generate(
         5,
@@ -60,22 +57,18 @@ class GameStateComponent extends Component {
     whitePieces.shuffle();
     blackPieces.shuffle();
 
-    cells = List.generate(
+    final cells = List.generate(
       9,
       (index) => (
-        whitePieces: [],
-        blackPieces: [],
+        whitePieces: <Piece>[],
+        blackPieces: <Piece>[],
       ),
     );
-    initCell = (
+    final initCell = (
       whitePieces: whitePieces,
       blackPieces: blackPieces,
     );
-  }
 
-  @override
-  FutureOr<void> onLoad() {
-    super.onLoad();
     final whitePieceCompoents = initCell.whitePieces
         .map(
           (e) => PieceComponent(
@@ -106,12 +99,26 @@ class GameStateComponent extends Component {
           pieces: blackPieceCompoents,
         ),
       ],
-      cells: List.generate(
-        9,
-        (index) => CellComponent(
-          pieces: [],
-        ),
-      ),
+      cells: cells
+          .map(
+            (e) => CellComponent(
+              pieces: [
+                ...e.whitePieces.map(
+                  (e) => PieceComponent(
+                    pieceColor: e.pieceColor,
+                    pieceNumber: e.pieceNumber,
+                  ),
+                ),
+                ...e.blackPieces.map(
+                  (e) => PieceComponent(
+                    pieceColor: e.pieceColor,
+                    pieceNumber: e.pieceNumber,
+                  ),
+                ),
+              ],
+            ),
+          )
+          .toList(),
     )
       ..cells.forEach(add)
       ..initCells.forEach(add);
